@@ -21,17 +21,17 @@ function draw() {
     stroke(255);
     noFill();
     let radius = 50;
-    ellipse(0, 0, radius * 2)
+    ellipse(0, 0, radius * 2);
 
     let x = radius * cos(time);
     let y = radius * sin(time);
-    wave.unshift(y)
+    wave.unshift(y);
     fill(255);
     line(0, 0, x, y);
     ellipse(x, y, 8);
 
     translate(100, 0);
-    line(x-100,y,0,wave[0])
+    line(x-100,y,0,wave[0]);
     beginShape();
     noFill();
 
@@ -40,7 +40,7 @@ function draw() {
     }
     endShape();
 
-    time += 0.05;
+    time += 0.08;
     if (wave.length>350){
         wave.pop();
     }

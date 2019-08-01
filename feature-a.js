@@ -1,2 +1,3 @@
 console.log("feature-a);
-Console.log("adding in master branch");
+console.log("adding in branch feature-c to file fearure-a.js");
+

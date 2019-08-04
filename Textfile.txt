@@ -6,6 +6,6 @@ This is an extra line
 //Adding a text in line 6
 77adkljsdlfkjglskdjf____edition in master branch remote repo.
 **********edited on remote repo master branch
-**********//merged comment in local repo. 
-
+**********//merged comment in local repo. .
+**this line is just going to be fetched first from remote master.
 End. 

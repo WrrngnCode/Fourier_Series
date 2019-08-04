@@ -5,6 +5,8 @@ let lblInfo;
 let time = 0;
 let wave = [];
 
+let ratio = 1; //50*0.07;
+
 function setup() {
 
     canv = createCanvas(600, 400);
@@ -13,38 +15,46 @@ function setup() {
     lblInfo = document.getElementById("lblInfo");
 
 }
-//this a comment made 
-//this comment is made on github, in the Comment-Sketch branch
+
 function draw() {
 
     background(0);
     translate(100, 200);
-    stroke(255);
-    noFill();
-    let radius = 50;
-    ellipse(0, 0, radius * 2);
+    
+    
+    let x = 0;
+    let y = 0;
+    for (let i = 0; i < 15; i++) {
+        let prevx=x;
+        let prevy=y;
+        let n = i * 2 + 1;
+        let radius = 50 * (4 / (n * PI));
+        x += radius * cos(n * time);
+        y += radius * sin(n * time);
+        
+        noFill();
+        stroke(255,100);
+        ellipse(prevx, prevy, radius * 2);
 
-    let x = radius * cos(time);
-    let y = radius * sin(time);
+        fill(255);
+        stroke(255);
+        line(prevx, prevy, x, y);
+        //ellipse(x, y, 2);
+    }
     wave.unshift(y);
-    fill(255);
-    line(0, 0, x, y);
-    ellipse(x, y, 8);
-
     translate(100, 0);
-    line(x-100,y,0,wave[0]);
+    line(x - 100, y, 0, wave[0]);
     beginShape();
     noFill();
 
     for (let i = 0; i < wave.length; i++) {
-        vertex(i,wave[i]);  
+        vertex(i * (ratio), wave[i]);
     }
     endShape();
 
-    time += 0.08;
-    if (wave.length>350){
+    time += 0.02;
+    if (wave.length > 350) {
         wave.pop();
     }
-
 
 }

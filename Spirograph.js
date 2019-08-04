@@ -3,7 +3,7 @@
 // http://patreon.com/codingtrain
 // Fractal Spirograph
 // Video: https://youtu.be/0dwJ-bkJwDI
-
+/// <reference path="./node_modules/@types/p5/global.d.ts" />
 var path = [];
 var SunTotalRevs = 3;
 var angle = 0;
@@ -11,7 +11,7 @@ var resolution = 55;
 var stepCounter = 0;
 var stepCounterLimit = 0;
 //var PointsPerCircle = 100; //speed effect
-var speedadjustfactor = 10;
+var speedadjustfactor = 50;
 let cv;
 var sun;
 var end;
@@ -22,7 +22,8 @@ let AnimRes_Input;
 var revs_Inputs = [];
 var radius_Inputs = [];
 var offsets_Inputs = [];
-
+let child1;
+let child2;
 function setup() {
     cv = createCanvas(600, 600);
     cv.parent('sketch-div');
@@ -33,26 +34,27 @@ function setup() {
         radius_Inputs[i] = document.getElementById("radius" + String(i + 1) + "Input");
     }
     AnimRes_Input = document.getElementById("ResolutionAnim");
-    AnimRes_Input.Value=resolution;
+    AnimRes_Input.value = resolution;
     AnimRes_Input.oninput = function() {
         if (isNaN(AnimRes_Input.value) === false && AnimRes_Input.value <= 1300 && AnimRes_Input.value > 5) {
             resolution = AnimRes_Input.value;
         }
+        resetSketch();
     };
 
     for (let k = 0; k < 2; k++) {
-        AddMyOnInputEventHandler(revs_Inputs[k], arr_revs, k+1, false, null);
-        AddMyOnInputEventHandler(offsets_Inputs[k], arr_radoffset, k+1, false, null);
-        AddMyOnInputEventHandler(radius_Inputs[k], arr_radius, k+1, false, null);
-       revs_Inputs[k].value = arr_revs[k+1];
-        offsets_Inputs[k].value = arr_radoffset[k+1];
-        radius_Inputs[k].value = arr_radius[k+1];        
+        AddMyOnInputEventHandler(revs_Inputs[k], arr_revs, k + 1, false, null);
+        AddMyOnInputEventHandler(offsets_Inputs[k], arr_radoffset, k + 1, false, null);
+        AddMyOnInputEventHandler(radius_Inputs[k], arr_radius, k + 1, false, null);
+        revs_Inputs[k].value = arr_revs[k + 1];
+        offsets_Inputs[k].value = arr_radoffset[k + 1];
+        radius_Inputs[k].value = arr_radius[k + 1];
     }
 
     sun = new Orbit(width / 2, height / 2, arr_radius[0], 1, null, 0, arr_revs[0]);
     var next = sun;
-    let child1 = sun.addChild(arr_radius[1], arr_radoffset[1], arr_revs[1]);
-    let child2 = child1.addChild(arr_radius[2], arr_radoffset[2], child1.RevsAroundParent * arr_revs[2]);
+    child1 = sun.addChild(arr_radius[1], arr_radoffset[1], arr_revs[1]);
+    child2 = child1.addChild(arr_radius[2], arr_radoffset[2], child1.RevsAroundParent * arr_revs[2]);
     end = child2;
     //console.log(TWO_PI / child2.angleincr);
     //console.log(child2.RevsAroundParent);   
@@ -64,6 +66,7 @@ function setup() {
 function draw() {
     background(51);
 
+    
     for (var i = 0; i < resolution; i++) {
         var next = sun;
         while (next != null) {
@@ -90,12 +93,12 @@ function draw() {
 
     if (path.length > 55000) {
         path.splice(0, resolution);
-        console.log("stepCounter: "+stepCounter);
+        console.log("stepCounter: " + stepCounter);
     }
 
     if (stepCounter > stepCounterLimit) {
-        //noLoop();
-       // console.log("stepCounter: "+stepCounter);
+        noLoop();
+        console.log("stepCounter: "+stepCounter);
     }
 
 }
@@ -125,7 +128,7 @@ function Orbit(x_, y_, r_, n, p, r_offset_, revs_) {
 
     this.update = function() {
         var parent = this.parent;
-        if (parent != null) {
+        if (parent != null) {            
             this.angle += this.angleincr;
             var rsum = this.r + parent.r + this.r_offset;
             this.x = parent.x + rsum * cos(this.angle);
@@ -145,6 +148,15 @@ function Orbit(x_, y_, r_, n, p, r_offset_, revs_) {
 
     }
 }
+function resetSketch(){
+
+   console.log(this._loop);
+   console.log("update");
+   path = [];
+   stepCounter=0;
+   loop();
+};
+
 
 function AddMyOnInputEventHandler(myHtmlElement, myArray, myIndex, WriteBackValue, displayingelement) {
 
@@ -153,9 +165,8 @@ function AddMyOnInputEventHandler(myHtmlElement, myArray, myIndex, WriteBackValu
             myArray[myIndex] = parseFloat(myHtmlElement.value);
             if (WriteBackValue) displayingelement.value = myArray[myIndex];
         }
+        resetSketch();
     };
-    path=[];
-    loop();
 }
 
 function AddMyOnWheelEventHandler(myHtmlElement, incr, myArray, myIndex, WriteBackValue, displayingelement) {

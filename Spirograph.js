@@ -61,7 +61,7 @@ function CalcPath() {
         let adjustratio = 40 / Child1ResolutionCalc;
         OrbitResolution = OrbitResolution * adjustratio;
         console.log("adjusted resolution " + OrbitResolution);
-        end.AngleIncr=end.GetAngleIncr(OrbitResolution, end.RevsAroundParent);
+        end.AngleIncr=end.GetMyAngleIncr(OrbitResolution, end.RevsAroundParent);
     }
     
     let child2incrementsteps = OrbitResolution * end.getSumOfRevolutions();
@@ -70,8 +70,9 @@ function CalcPath() {
     //child1.angleIncr = TWO_PI / sun.OrbitResolution * child2.RevsAroundParent;
     console.log(child1.angleIncr);
     console.log(child2.angleIncr);
+    console.log(child1.angleIncr/child2.angleIncr);
     console.log(child2incrementsteps);
-    console.log("total revs child2: " + child1.RevsAroundParent * child2.RevsAroundParent);
+    //console.log("total revs child2: " + child1.RevsAroundParent * child2.RevsAroundParent);
 
     for (let child1Steps = 0; child1Steps < child2incrementsteps; child1Steps += 1) {
         var next = child1;

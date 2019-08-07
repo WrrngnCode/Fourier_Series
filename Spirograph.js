@@ -52,25 +52,25 @@ function setup() {
 }
 
 function CalcPath() {
-
+    let ir;
     //adjust resolution:
     let Child1ResolutionCalc = OrbitResolution / end.getSumOfRevolutions() * sun.child.RevsAroundParent;
 
-    if (Child1ResolutionCalc < 40) {
+    if (Child1ResolutionCalc < 100) {
         console.log("Child1ResolutionCalc " + Child1ResolutionCalc);
-        let adjustratio = 40 / Child1ResolutionCalc;
-        OrbitResolution = OrbitResolution * adjustratio;
-        console.log("adjusted resolution " + OrbitResolution);
-        end.AngleIncr=end.GetMyAngleIncr(OrbitResolution, end.RevsAroundParent);
+        let adjustratio = 100 / Child1ResolutionCalc;
+        OrbitResolution = floor(OrbitResolution * adjustratio);
+        //console.log("adjusted resolution " + OrbitResolution);
+        ir = end.GetMyAngleIncr(OrbitResolution, end.RevsAroundParent);
     }
-    
+
     let child2incrementsteps = OrbitResolution * end.getSumOfRevolutions();
-    //child2.angleIncr = TWO_PI / sun.OrbitResolution;
+    //child2.angleIncr = TWO_PI / OrbitResolution;
     //child2.angleIncr = TWO_PI / child2incrementsteps;
-    //child1.angleIncr = TWO_PI / sun.OrbitResolution * child2.RevsAroundParent;
+    //child1.angleIncr = TWO_PI / OrbitResolution * child2.RevsAroundParent;
     console.log(child1.angleIncr);
-    console.log(child2.angleIncr);
-    console.log(child1.angleIncr/child2.angleIncr);
+    console.log(child2.angleIncr + "______res: " + OrbitResolution);
+    console.log(child1.angleIncr / child2.angleIncr + "   Child2.Revs " + child2.RevsAroundParent);
     console.log(child2incrementsteps);
     //console.log("total revs child2: " + child1.RevsAroundParent * child2.RevsAroundParent);
 
@@ -97,7 +97,7 @@ function InitObjects() {
 }
 
 function ReadInputValues() {
-
+    console.log("input");
     for (let k = 0; k < 2; k++) {
         arr_revs[k + 1] = revs_Inputs[k].value;
         arr_radoffset[k + 1] = offsets_Inputs[k].value;

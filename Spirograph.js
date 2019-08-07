@@ -1,20 +1,20 @@
-// inspirired by
+// Inspirired by
 // Fractal Spirograph
 // Video: https://youtu.be/0dwJ-bkJwDI
 /// <reference path="./node_modules/@types/p5/global.d.ts" />
 var path = [];
 var SunTotalRevs = 3;
 var angle = 0;
-var resolution = 5; //animation resolution
 var stepCounter = 0;
 var stepCounterLimit = 0;
-//var PointsPerCircle = 100; //speed effect
+var drawMe = false;
+var OrbitResolution = 120;
 var speedadjustfactor = 0.05;
 let cv;
 var sun;
 var end;
 var arr_radius = [100, 45, 25];
-var arr_revs = [1, 2, 7.11242523454];
+var arr_revs = [1, 4, 3];
 var arr_radoffset = [0, 0, -20];
 let AnimRes_Input;
 var revs_Inputs = [];
@@ -27,13 +27,13 @@ function setup() {
     cv = createCanvas(600, 600);
     cv.parent('sketch-div');
 
-    AnimRes_Input = document.getElementById("ResolutionAnim");
-    AnimRes_Input.value = resolution;
-    AnimRes_Input.oninput = function() {
-        if (isNaN(AnimRes_Input.value) === false && AnimRes_Input.value <= 1300 && AnimRes_Input.value > 5) {
-            resolution = AnimRes_Input.value;
-        }
-    };
+    // AnimRes_Input = document.getElementById("ResolutionAnim");
+    // AnimRes_Input.value = resolution;
+    // AnimRes_Input.oninput = function() {
+    //     if (isNaN(AnimRes_Input.value) === false && AnimRes_Input.value <= 1300 && AnimRes_Input.value > 5) {
+    //         resolution = AnimRes_Input.value;
+    //     }
+    // };
     for (let i = 0; i < 2; i++) {
         revs_Inputs[i] = document.getElementById("rev" + String(i + 1) + "Input");
         offsets_Inputs[i] = document.getElementById("offset" + String(i + 1) + "Input")
@@ -48,27 +48,54 @@ function setup() {
         radius_Inputs[k].value = arr_radius[k + 1];
     }
     InitObjects();
-    //console.log(TWO_PI / child2.angleincr);
-    //console.log(child2.RevsAroundParent);   
-    //console.log(child2.angleincr);
-    //stepCounterLimit = (TWO_PI / child2.angleincr / speedadjustfactor) * child2.RevsAroundParent;
+    drawMe = true;
+}
+
+function CalcPath() {
+
+    //adjust resolution:
+    let Child1ResolutionCalc = OrbitResolution / end.getSumOfRevolutions() * sun.child.RevsAroundParent;
+
+    if (Child1ResolutionCalc < 40) {
+        console.log("Child1ResolutionCalc " + Child1ResolutionCalc);
+        let adjustratio = 40 / Child1ResolutionCalc;
+        OrbitResolution = OrbitResolution * adjustratio;
+        console.log("adjusted resolution " + OrbitResolution);
+        end.AngleIncr=end.GetAngleIncr(OrbitResolution, end.RevsAroundParent);
+    }
+    
+    let child2incrementsteps = OrbitResolution * end.getSumOfRevolutions();
+    //child2.angleIncr = TWO_PI / sun.OrbitResolution;
+    //child2.angleIncr = TWO_PI / child2incrementsteps;
+    //child1.angleIncr = TWO_PI / sun.OrbitResolution * child2.RevsAroundParent;
+    console.log(child1.angleIncr);
+    console.log(child2.angleIncr);
+    console.log(child2incrementsteps);
+    console.log("total revs child2: " + child1.RevsAroundParent * child2.RevsAroundParent);
+
+    for (let child1Steps = 0; child1Steps < child2incrementsteps; child1Steps += 1) {
+        var next = child1;
+        while (next != null) {
+            next.update();
+            next = next.child;
+        }
+        path.push(createVector(end.x, end.y));
+        stepCounter++;
+    }
 }
 
 function InitObjects() {
-
-    sun = new Orbit(width / 2, height / 2, arr_radius[0], 1, null, 0, arr_revs[0]);
-    
+    sun = new Orbit(width / 2, height / 2, arr_radius[0], null, 0, arr_revs[0]);
     child1 = sun.addChild(arr_radius[1], arr_radoffset[1], arr_revs[1]);
     child2 = child1.addChild(arr_radius[2], arr_radoffset[2], arr_revs[2]);
     end = child2;
-    stepCounterLimit = 360;
-    console.log("INitobjects: steps"+sun.child.RevsAroundParent * stepCounterLimit);
+    stepCounterLimit = 152000;
+    //console.log("Init: steps planned: " + sun.child.RevsAroundParent * sun.child.child.RevsAroundParent * sun.OrbitResolution);
     path = [];
-    
-
+    drawMe = true;
 }
 
-function resetSketch() {
+function ReadInputValues() {
 
     for (let k = 0; k < 2; k++) {
         arr_revs[k + 1] = revs_Inputs[k].value;
@@ -76,7 +103,6 @@ function resetSketch() {
         arr_radius[k + 1] = radius_Inputs[k].value;
     }
 
-    console.log("resetSketch");
     path = [];
     stepCounter = 0;
     InitObjects();
@@ -84,52 +110,30 @@ function resetSketch() {
 };
 
 function draw() {
-    background(51);
 
 
-    let child1step = TWO_PI / stepCounterLimit / sun.child.RevsAroundParent;
-    let child1anglemax = TWO_PI * sun.child.RevsAroundParent;
+    if (drawMe) {
+        background(51);
+        CalcPath();
 
-    for (let child1Angle = 0; child1Angle < child1anglemax; child1Angle += child1step) {
-        var next = child1;
-        let a = child1Angle;
-        while (next != null) {
-            a = a * next.RevsAroundParent;
-            next.update(a);
-            next = next.child;
+        strokeWeight(1);
+        beginShape();
+        stroke(255, 0, 255);
+        noFill();
+        for (var pos of path) {
+            vertex(pos.x, pos.y);
         }
-        path.push(createVector(end.x, end.y));
-        stepCounter++;
+        endShape();
+        drawMe = false;
     }
 
-    // for (var i = 0; i < resolution; i++) {
-    //     var next = sun;
-    //     while (next != null) {
-    //         next.update();
-    //         next = next.child;
-    //     }
-    //     path.push(createVector(end.x, end.y));
-    //     stepCounter++;
-    // }
 
-    // var next = sun;
-    // while (next != null) {
-    //     next.show();
-    //     next = next.child;
-    // }
-    strokeWeight(1);
-    beginShape();
-    stroke(255, 0, 255);
-    noFill();
-    for (var pos of path) {
-        vertex(pos.x, pos.y);
-    }
-    endShape();
+
     lblInfo.innerHTML = stepCounter + "------path.length: " + path.length;
-    path = [];
-    if (path.length > 55000) {
-        path.splice(0, 10000);
-        console.log("PAth too long: " + path.length + "StepCounter: " + stepCounter);
+
+    if (path.length > 155000) {
+        //path.splice(0, 10000);
+        console.log("Path too long: " + path.length + "StepCounter: " + stepCounter);
     }
 
     if (stepCounter > stepCounterLimit) {
@@ -139,10 +143,6 @@ function draw() {
 
 }
 
-
-
-
-
 function AddMyOnInputEventHandler(myHtmlElement, myArray, myIndex, WriteBackValue, displayingelement) {
 
     myHtmlElement.oninput = function() {
@@ -150,7 +150,7 @@ function AddMyOnInputEventHandler(myHtmlElement, myArray, myIndex, WriteBackValu
             myArray[myIndex] = parseFloat(myHtmlElement.value);
             if (WriteBackValue) displayingelement.value = myArray[myIndex];
         }
-        resetSketch();
+        ReadInputValues();
     };
 }
 

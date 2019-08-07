@@ -65,7 +65,7 @@ Orbit.prototype.GetMyAngleIncr = function(res, q) {
 }
 
 Orbit.prototype.UpdateMyParentsAngleIncr = function(childrevs, childangleIncr) {
-    let parentAngleIncr = parseFloat(childangleIncr) * parseFloat(childrevs);
+    let parentAngleIncr = parseFloat(childangleIncr) / parseFloat(childrevs);
     this.parent.angleIncr = parentAngleIncr;
     if (this.parent.parent != null) {
         this.parent.UpdateMyParentsAngleIncr(this.parent.RevsAroundParent, parentAngleIncr);

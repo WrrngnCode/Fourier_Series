@@ -55,7 +55,7 @@ function Orbit(x_, y_, r_, p, r_offset_, revs_) {
 }
 
 
-Orbit.prototype.GetMyAngleIncr = function(res, q) {
+Orbit.prototype.GetMyAngleIncr = function(res) {
     let incr = TWO_PI / res;
     this.angleIncr = incr;
     if (this.parent != null) {

@@ -15,7 +15,7 @@ let cv;
 var sun;
 var end;
 var arr_radius = [100, 50, 25, 12, 2, 5, 10];
-var arr_revs = [1, -1, 4, -3, -8, 2, 2];
+var arr_revs = [1, -1, 4, -2, 1, 2, 2];
 var arr_radoffset = [0, 0, 0, 0, 0, 0, 0];
 let AnimSpeedSlider;
 let animresolution;
@@ -48,13 +48,7 @@ function setup() {
     InitObjects();
 
 }
-function GenerateRandomPattern(e){
-    for (let i=1;i<4;i++){
-        revs_Inputs[i]=pow(e,i);
-        radius_Inputs[i] =random(10,70);
-        offsets_Inputs[i]=random(-50,50);
-    }
-}
+
 
 function InitObjects() {
 
@@ -82,8 +76,8 @@ function AdjustOrbitAngleIncrements() {
     OrbitResolution = 50; //let Child1ResolutionCalc = abs(OrbitResolution / end.getSumOfRevolutions() * sun.child.RevsAroundParent);
     let child2incrementsteps = abs(OrbitResolution * end.getSumOfRevolutions());
 
-    if (child2incrementsteps > 10000) {
-        let adjustratio = 10000 / child2incrementsteps;
+    if (child2incrementsteps > 20000) {
+        let adjustratio = 20000 / child2incrementsteps;
         OrbitResolution = OrbitResolution * adjustratio;
         if (OrbitResolution < 15) {
             OrbitResolution = 15;
@@ -91,8 +85,8 @@ function AdjustOrbitAngleIncrements() {
         ir = end.GetMyAngleIncr(OrbitResolution, end.RevsAroundParent);
     }
     child2incrementsteps = abs(OrbitResolution * end.getSumOfRevolutions());
-    if (child2incrementsteps > 10000) {
-        child2incrementsteps = 10000;
+    if (child2incrementsteps > 20000) {
+        child2incrementsteps = 20000;
     }
     return child2incrementsteps;
 }
@@ -104,12 +98,37 @@ function ReadInputValues() {
         arr_radoffset[k + 1] = offsets_Inputs[k].value;
         arr_radius[k + 1] = radius_Inputs[k].value;
     }
-
     path = [];
     stepCounter = 0;
     InitObjects();
-
 };
+
+function keyPressed() {
+    console.log("key");
+    if ((key == "f" || key == "F") && keyCode !== 102) {
+        //GenerateRandomSpirographPattern(random(-5, 5), random(5));
+        GenerateRandomSpirographPattern(random(7,-7), random(1.3, 3), random(60, 80));
+        InitObjects();
+    }
+}
+
+function GenerateRandomSpirographPattern(q, n, r) {
+
+    for (let i = 1; i < 4; i++) {
+        arr_revs[i] = pow(q, i);
+        arr_radius[i] = r / (pow(n, i));
+        arr_radoffset[i] = 0; //random(-50, 50);
+    }
+    arr_revs[3]=1;
+    for (let k = 0; k < 2; k++) {
+        revs_Inputs[k].value = arr_revs[k + 1];
+        offsets_Inputs[k].value = arr_radoffset[k + 1];
+        radius_Inputs[k].value = arr_radius[k + 1];
+    }
+
+    console.log(arr_revs);
+    console.log(arr_radius);
+}
 
 function draw() {
 
@@ -122,16 +141,8 @@ function draw() {
     if (animation) {
         Animate();
     }
-    lblInfo.innerHTML = stepCounter + "------path.length: " + path.length;
-    if (path.length > 50000) {
-        path.splice(0, 2000);
-        console.log("Path too long: " + path.length + "StepCounter: " + stepCounter);
-    }
+    lblInfo.innerHTML = stepCounterLimit + "------path.length: " + path.length;
 
-    if (stepCounter > stepCounterLimit) {
-        //noLoop();
-        //console.log("2stepCounter: " + stepCounter);
-    }
 }
 
 function CalcPath() {
@@ -213,16 +224,4 @@ function AddMyOnWheelEventHandler(myHtmlElement, incr, myArray, myIndex, WriteBa
             //console.log("onwheel " + myHtmlElement.id)
         }
     };
-}
-
-
-
-
-function keyPressed() {
-
-   
-    if ((key == "f" || key == "F") && keyCode !== 102) {
-        GenerateRandomPattern();
-
-    }
 }

@@ -15,9 +15,10 @@ let cv;
 var sun;
 var end;
 var arr_radius = [100, 50, 25, 12, 2, 5, 10];
-var arr_revs = [1, -1, 4, -2, 1, 2, 2];
+var arr_revs = [1, -1, 4, -2, 2, 2, 2];
 var arr_radoffset = [0, 0, 0, 0, 0, 0, 0];
 let AnimSpeedSlider;
+let SweepSlider;
 let animresolution;
 var revs_Inputs = [];
 var radius_Inputs = [];
@@ -26,12 +27,14 @@ let child1;
 let child2;
 let child3;
 let lblInfo;
+let ChildrenCount = 3;
+var sweep = 0;
 
 function setup() {
     cv = createCanvas(600, 600);
     cv.parent('sketch-div');
     lblInfo = document.getElementById("lblInfo");
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < ChildrenCount; i++) {
         revs_Inputs[i] = document.getElementById("rev" + String(i + 1) + "Input");
         offsets_Inputs[i] = document.getElementById("offset" + String(i + 1) + "Input")
         radius_Inputs[i] = document.getElementById("radius" + String(i + 1) + "Input");
@@ -45,6 +48,7 @@ function setup() {
         radius_Inputs[k].value = arr_radius[k + 1];
     }
     AnimSpeedSlider = document.getElementById("AnimSpeedSlider");
+    SweepSlider = document.getElementById("SweepSlider");
     InitObjects();
 
 }
@@ -54,40 +58,40 @@ function InitObjects() {
 
     let childx;
 
-    sun = new Orbit(width / 2, height / 2, arr_radius[0], null, 0, arr_revs[0]);
+    sun = new Orbit(width / 2, height / 2, arr_radius[0], null, 0, arr_revs[0], 0);
     childx = sun;
-    for (let i = 1; i < 4; i++) {
-        childx = childx.addChild(arr_radius[i], arr_radoffset[i], arr_revs[i]);
+    for (let i = 1; i < ChildrenCount + 1; i++) {
+        childx = childx.addChild(arr_radius[i], arr_radoffset[i], arr_revs[i], i);
     }
     end = childx;
     path = [];
-    stepCounterLimit = AdjustOrbitAngleIncrements();
-
+    stepCounterLimit = GetTotalSteps();
     drawMe = true;
     animation = false;
     //drawMe = false;
     //animation = true;
-
 }
 
-function AdjustOrbitAngleIncrements() {
+function GetTotalSteps() {
 
     let ir;
-    OrbitResolution = 50; //let Child1ResolutionCalc = abs(OrbitResolution / end.getSumOfRevolutions() * sun.child.RevsAroundParent);
+    OrbitResolution = 60 + sweep; //let Child1ResolutionCalc = abs(OrbitResolution / end.getSumOfRevolutions() * sun.child.RevsAroundParent);
     let child2incrementsteps = abs(OrbitResolution * end.getSumOfRevolutions());
 
-    if (child2incrementsteps > 20000) {
-        let adjustratio = 20000 / child2incrementsteps;
+    if (child2incrementsteps > 40000) {
+        let adjustratio = 40000 / child2incrementsteps;
         OrbitResolution = OrbitResolution * adjustratio;
+        lblInfo.innerHTML+="</br> Orbitresulution adjusted</br>";
         if (OrbitResolution < 15) {
             OrbitResolution = 15;
         }
-        ir = end.GetMyAngleIncr(OrbitResolution, end.RevsAroundParent);
+        //ir = end.GetMyAngleIncr(OrbitResolution, end.RevsAroundParent);
     }
     child2incrementsteps = abs(OrbitResolution * end.getSumOfRevolutions());
-    if (child2incrementsteps > 20000) {
-        child2incrementsteps = 20000;
-    }
+    
+    // if (child2incrementsteps > 20000) {
+    //     child2incrementsteps = 20000;
+    // }
     return child2incrementsteps;
 }
 
@@ -104,45 +108,41 @@ function ReadInputValues() {
 };
 
 function keyPressed() {
-    console.log("key");
+
     if ((key == "f" || key == "F") && keyCode !== 102) {
-        //GenerateRandomSpirographPattern(random(-5, 5), random(5));
-        GenerateRandomSpirographPattern(random(7,-7), random(1.3, 3), random(60, 80));
+
+        GenerateRandomSpirographPattern(-4, 2, 60);
         InitObjects();
     }
 }
 
-function GenerateRandomSpirographPattern(q, n, r) {
-
-    for (let i = 1; i < 4; i++) {
-        arr_revs[i] = pow(q, i);
-        arr_radius[i] = r / (pow(n, i));
-        arr_radoffset[i] = 0; //random(-50, 50);
-    }
-    arr_revs[3]=1;
-    for (let k = 0; k < 2; k++) {
-        revs_Inputs[k].value = arr_revs[k + 1];
-        offsets_Inputs[k].value = arr_radoffset[k + 1];
-        radius_Inputs[k].value = arr_radius[k + 1];
-    }
-
-    console.log(arr_revs);
-    console.log(arr_radius);
-}
-
 function draw() {
+    sweep = map(SweepSlider.value, 0, 100, -60, 60);
 
     if (drawMe) {
+        GenerateRandomSpirographPattern(-3, 1, 60);
+        InitObjects();
         background(51);
         CalcPath();
         displayVertexShape();
-        drawMe = false;
+        var next = sun;
+        while (next != null) {
+            next.show();
+            next = next.child;
+        }
+        //drawMe = false;
     }
     if (animation) {
         Animate();
     }
     lblInfo.innerHTML = stepCounterLimit + "------path.length: " + path.length;
+    lblInfo.innerHTML += "</br> ORbitres: " + OrbitResolution;
+    var ch1 = sun.child
+    while (ch1 != null) {
 
+        lblInfo.innerHTML += "</br> AngleIncr: " + ch1.AngleIncr + "  Revs: " + ch1.RevsAroundParent;
+        ch1 = ch1.child;
+    }
 }
 
 function CalcPath() {

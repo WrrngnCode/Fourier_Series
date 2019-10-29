@@ -21,7 +21,7 @@ function dft(x) {
         //2/N
         //Each sample in the frequency domain can be thought of as being contained in a frequency band of width 2/N, expressed as a fraction of the total bandwidth.
         re = re / dataPoints * 2; //average out by the number of datapoints and *2 due to deleted samples over Nyquiest limit
-        im = -1*im / dataPoints * 2;
+        im = -1 * im / dataPoints * 2;
 
         X[k] = {
             re: re,
@@ -45,19 +45,19 @@ function dft(x) {
 
 class Complex {
 
-    constructor(re,im){
-        this.re=re;
-        this.im=im;
+    constructor(re, im) {
+        this.re = re;
+        this.im = im;
     }
-    add(c){
-        this.re=this.re+c.re;
-
+    add(c) {
+        this.re = this.re + c.re;
+        this.im = this.im + c.im;
     }
-    mult(c){
+    mult(c) {
         //(a+bi)*(c+di)=(ac-bd)+(ad+bc)i
-        const re=this.re*c.re-this.im*c.im;
-        const im=this.re*c.im+this.im*c.re;
-        return new Complex(re,im);
+        const re = this.re * c.re - this.im * c.im;
+        const im = this.re * c.im + this.im * c.re;
+        return new Complex(re, im);
 
     }
 
@@ -67,35 +67,26 @@ function complexDFT(Curve2D) {
 
     let X = [];
 
-    const N = Curve2D.length / 2 + 1; //over the Nyquist limit (+1 to have N/2+1 indexes)
+    const N = Curve2D.length; 
     const dataPoints = Curve2D.length;
 
     for (let k = 0; k < N; k++) {
-       
-        let sum=new Complex(0,0);
+
+        let sum = new Complex(0, 0);
         for (let n = 0; n < dataPoints; n++) {
             //k= frequency
             let phi = TWO_PI * k * n / dataPoints;
-            const actDatapoint=new Complex(cos(phi),-sin(phi));
-            //correlating the input signal with each sine/cosine basis functions
+            const actDatapoint = new Complex(cos(phi), -sin(phi));
             sum.add(Curve2D[n].mult(actDatapoint));
-
-           
-            // 'sum.re += x[n] * cos(phi);
-            // sum.im += x[n] * sin(phi);'
         }
-        //The difference occurs because the frequency domain is defined as a spectral density.
-        //To convert the sinusoidal amplitudes into a spectral density, divide each amplitude by the bandwidth represented by each amplitude.
-        //2/N
-        //Each sample in the frequency domain can be thought of as being contained in a frequency band of width 2/N, expressed as a fraction of the total bandwidth.
-        sum.re = sum.re / dataPoints * 2; //average out by the number of datapoints and *2 due to deleted samples over Nyquiest limit
-        sum.im = -1*sum.im / dataPoints * 2;
+        sum.re = sum.re / dataPoints ;
+        sum.im = sum.im / dataPoints ;
 
         X[k] = {
-            re:sum.re,
-            im: im,
-            amp: Math.sqrt(re * re + im * im),
-            phase: Math.atan2(im, re),
+            re: sum.re,
+            im: sum.im,
+            amp: Math.sqrt(sum.re * sum.re + sum.im * sum.im),
+            phase: Math.atan2(sum.im, sum.re),
             freq: k
         };
     }
@@ -106,7 +97,6 @@ function complexDFT(Curve2D) {
     X[0].amp = X[0].amp / 2;
     X[N - 1].amp = X[N - 1].amp / 2;
 
-
-
     return X;
+
 }
